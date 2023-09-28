@@ -1,0 +1,282 @@
+##############################################################################
+# Math mode
+##############################################################################
+
+
+snippet `((\d+)|(\d*)(\\)?([A-Za-z]+)((\^|_)(\{\d+\}|\d))*)/` "Fraction no ()" Am
+\frac{``rv = m[1]``}{$1}$0
+endsnippet
+
+snippet fr "frac" 
+\\frac{${1:${VISUAL}}}{$2}
+endsnippet
+
+snippet box "Box" 
+``rv = '┌' + '─'.repeat(t[0].length + 2) + '┐'``
+│ $1 │  
+``rv = '└' + '─'.repeat(t[0].length + 2) + '┘'``
+endsnippet
+
+snippet beg "LaTeX Begin/End"
+\\begin{${1:env}}
+$2
+\\end{$1}
+endsnippet
+
+snippet ii "LaTeX Inline Math (Dollars)" 
+$ ${1:your math formula} $ $0
+endsnippet
+
+snippet dd "LaTeX Display Math (Dollars)" 
+$$
+$1
+$$$0
+endsnippet
+
+snippet img "LaTeX Insert Image" 
+\\begin{figure}[htbp]
+\\centering
+\\includegraphics[width=0.8\\textwidth]{$1}
+\\caption{$2}
+\\label{fig:$3}
+\\end{figure}
+$0
+endsnippet
+
+snippet up "superscript" iAm
+^{$1}$0
+endsnippet
+
+
+snippet `\b([a-zA-Z])(\d)` "sub number" Am
+``rv = m[1]``_{``rv = m[2]``}
+endsnippet
+
+
+snippet `([a-zA-Z])_(\d\d)` "sub two numbers" Am
+``rv = m[1]``_{``rv = m[2]``}
+endsnippet
+
+##############################################################################
+# Math Font
+##############################################################################
+
+
+snippet xt "LaTeX Italic Text" 
+\\textit{${1:italic text}}$0
+endsnippet
+
+snippet bt "LaTeX Bold Text" 
+\\textbf{${1:bold text}}$0
+endsnippet
+
+snippet tt "Latex text"
+\\text{${1:text}}$0      
+endsnippet
+
+
+snippet RR "R" iAm
+\mathbb{R}
+endsnippet
+
+snippet QQ "Q" iAm
+\mathbb{Q}
+endsnippet
+
+snippet ZZ "Z" iAm
+\mathbb{Z}
+endsnippet
+
+snippet NN "NN" iAm
+\mathbb{N}
+endsnippet
+
+snippet CC "C" iAm
+\mathbb{C}
+endsnippet
+
+snippet mathbb "mathbb" iAm
+\mathbb{$1}
+endsnippet
+
+snippet mathcal "mathcal" iAm
+\mathcal{$1}
+endsnippet
+
+snippet mathfrak "mathfrak" iAm
+\mathfrak{$1}
+endsnippet
+
+snippet mathrm "mathrm" iAm
+\mathrm{$1}
+endsnippet
+
+snippet operatorname "operatorname" iAm
+\operatorname{$1}
+endsnippet
+
+##############################################################################
+# Symbols
+##############################################################################
+
+
+snippet alpha "Greek Letter Alpha" m
+\\alpha
+endsnippet
+
+snippet beta "Greek Letter Beta" m 
+\\beta
+endsnippet
+
+snippet gamma "Greek Letter Gamma" m
+\\gamma
+endsnippet
+
+snippet delta "Greek Letter Delta" m 
+\\delta
+endsnippet
+
+snippet Gamma "Greek Letter Gamma Uppercase" m
+\\Gamma
+endsnippet
+
+snippet Delta "Greek Letter Delta Uppercase" m
+\\Delta
+endsnippet
+
+snippet epsilon "Greek Letter Epsilon" m
+\\epsilon
+endsnippet
+
+snippet zeta "Greek Letter Zeta" m
+\\zeta
+endsnippet
+
+snippet eta "Greek Letter Eta" m
+\\eta
+endsnippet
+
+snippet theta "Greek Letter Theta" m
+\\theta
+endsnippet
+
+snippet iota "Greek Letter Iota" m
+\\iota
+endsnippet
+
+snippet kappa "Greek Letter Kappa" m
+\\kappa
+endsnippet
+
+snippet lambda "Greek Letter Lambda" m
+\\lambda
+endsnippet
+
+snippet mu "Greek Letter Mu" m
+\\mu
+endsnippet
+
+snippet nu "Greek Letter Nu" m
+\\nu
+endsnippet
+
+snippet Lambda "Greek Letter Lambda Uppercase" m
+\\Lambda
+endsnippet
+
+snippet pi "Greek Letter Pi" m
+\\pi
+endsnippet
+
+snippet rho "Greek Letter Rho" m
+\\rho
+endsnippet
+
+snippet sigma "Greek Letter Sigma" m
+\\sigma
+endsnippet
+
+snippet tau "Greek Letter Tau" m
+\\tau
+endsnippet
+
+snippet phi "Greek Letter Phi" m
+\\phi
+endsnippet
+
+snippet chi "Greek Letter Chi" m
+\\chi
+endsnippet
+
+snippet psi "Greek Letter Psi" m
+\\psi
+endsnippet
+
+snippet omega "Greek Letter Omega" m
+\\omega
+endsnippet
+
+snippet Sigma "Greek Letter Sigma Uppercase" m
+\\Sigma
+endsnippet
+
+snippet Pi "Greek Letter Pi Uppercase" m
+\\Pi
+endsnippet
+
+snippet Phi "Greek Letter Phi Uppercase" m
+\\Phi
+endsnippet
+
+snippet Psi "Greek Letter Psi Uppercase" m
+\\Psi
+endsnippet
+
+snippet Omega "Greek Letter Omega Uppercase" m
+\\Omega
+endsnippet
+
+snippet varphi "Greek Letter Varphi" m
+\\varphi
+endsnippet
+
+snippet cup "Union" m
+\\cup
+endsnippet
+
+snippet cap "Intersection" m
+\\cap
+endsnippet
+
+snippet cdot "Centered Dot" m
+\\cdot
+endsnippet
+
+snippet cdots "Centered Dots" m
+\\cdots
+endsnippet
+
+
+
+##############################################################################
+# Special snippets
+##############################################################################
+
+snippet pe "LaTeX Proposition Environment"
+\\begin{proposition}
+$1
+\\end{proposition}
+$0
+endsnippet
+
+snippet ee "LaTeX Example Environment" 
+\\begin{example}
+$1
+\\end{example}
+$0
+endsnippet
+
+snippet bd "LaTeX bold Definition text"
+\\textbf{Definition.} 
+endsnippet
+
