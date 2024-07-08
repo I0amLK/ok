@@ -1,282 +1,1283 @@
-##############################################################################
-# Math mode
-##############################################################################
+##########################################
+#                                        #
+#    HyperSnips MAth for LaTeX           #
+#                                        #
+#            2023/11/14                  #
+#                                        #
+#        For Hypersnips math             #
+#                                        #
+#                                        #
+##########################################
+
+#### Index
+
+# 1. Global JavaScript Function
+# 2. Math Notation
+# 3. Greek letter
+# 4. fraction
+# 5. prefix mode
+# 6. Superscript & Subscript
+# 7. Temp
+# 8. for Notes of Heenger point
+# 9. for Notes of L-funtion
+# 10. Modular Form
+# 11. Special for eigencure
 
 
-snippet `((\d+)|(\d*)(\\)?([A-Za-z]+)((\^|_)(\{\d+\}|\d))*)/` "Fraction no ()" Am
-\frac{``rv = m[1]``}{$1}$0
+
+#### Global JavaScript Function ####
+
+global
+function text(context) {
+    return !context.scopes.some(s => s.startsWith("meta.math") || s.startsWith("meta.embedded") || s.startsWith("source"));
+}
+endglobal
+
+global
+function math(context) {
+    return context.scopes.some(s => s.startsWith("meta.math"));
+}
+endglobal
+
+global
+// Dic
+
+    // Greek Letter
+
+    const greek  = {
+            "a" : "\\alpha",
+            "b" : "\\beta",
+            "c" : "\\chi",
+            "d" : "\\delta",
+            "e" : "\\epsilon",
+            "ve": "\\varepsilon",
+            "f" : "\\phi",
+            "vf" : "\\varphi",
+            "g" : "\\gamma",
+            "h" : "\\eta",
+            "i" : "\\iota",
+            "j" : "\\varphi",
+            "k" : "\\kappa",
+            "vk": "\\varkappa",
+            "l" : "\\lambda",
+            "m" : "\\mu",
+            "n" : "\\nu",
+            "o" : "\\omicron",
+            "p" : "\\pi",
+            "vp" : "\\varpi",
+            "q" : "\\theta",
+            "vq" : "\\vartheta",
+            "r" : "\\rho",
+            "s" : "\\sigma",
+            "vs" : "\\varsigma",
+            "t" : "\\tau",
+            "u" : "\\upsilon",
+            "v" : "\\varpi",
+            "w" : "\\omega",
+            "x" : "\\xi",
+            "y" : "\\psi",
+            "z" : "\\zeta",
+            "A" : "\\Alpha",
+            "B" : "\\Beta",
+            "C" : "\\Chi",
+            "D" : "\\Delta",
+            "E" : "\\Epsilon",
+            "F" : "\\Phi",
+            "G" : "\\Gamma",
+            "H" : "\\Eta",
+            "I" : "\\Iota",
+            "K" : "\\Kappa",
+            "L" : "\\Lambda",
+            "M" : "\\Mu",
+            "N" : "\\Nu",
+            "O" : "\\Omicron",
+            "P" : "\\Pi",
+            "Q" : "\\Theta",
+            "R" : "\\Rho",
+            "S" : "\\Sigma",
+            "T" : "\\Tau",
+            "U" : "\\Upsilon",
+            "W" : "\\Omega",
+            "X" : "\\Xi",
+            "Y" : "\\Psi",
+            "Z" : "\\Zeta"
+        };
+
+    // prefix
+
+    const prefix = {
+        "bar" : ["\\\\overline{"             ,"}"   ],
+        "fn"  : ["\\\\overset{\\\\frown}{"   ,"}"   ],
+        "td"  : ["\\\\widetilde{"            ,"}"   ],
+        "rm"  : ["\\\\mathrm{"               ,"}"   ],
+        "hat" : ["\\\\hat{"                  ,"}"   ],
+        "cr"  : ["\\\\mathscr{"              ,"}"   ],
+        "bav" : ["\\\\hat{\\\\boldsymbol{"   ,"}}"  ],
+        "vec" : ["\\\\vec{"                  ,"}"   ],
+        "bm"  : ["\\\\boldsymbol{"           ,"}"   ],
+        "bf"  : ["\\\\mathbf{"               ,"}"   ],
+        "cal" : ["\\\\mathcal{"              ,"}"   ],
+        "dot"  : ["\\\\dot{"                  ,"}"   ],
+        "vdot" : ["\\\\dot{\\\\boldsymbol{"   ,"}}"  ],
+        "mtb" : ["\\\\mathbb{"               ,"}"    ]
+    }
+
+    //  block
+
+
+    const block = {
+        "tm" : ["Thm"        ,"brown"  ,"▶",0],
+        "tt" : ["Thm"        ,"brown"  ,"▶",1],
+        "ex" : ["Ex"         ,"teal"   ,"▶",0],
+        "pf" : ["Pf"         ,"green"  ,"▶",0],
+        "pb" : ["Problem"    ,"teal"   ,"▶",0],
+        "sn" : ["Sol"        ,"green"  ,"▶",0],
+        "df" : ["Def"        ,"purple" ,"▶",0],
+        "dd" : ["Def"        ,"purple" ,"▶",1],
+        "st" : ["Step"       ,"orange" ,"▶",0],
+        "md" : ["Method"     ,"brown"  ,"■",0],
+        "cc" : ["Case"       ,"brown"  ,"●",0],
+        "ds" : ["Discussion" ,"brown"  ,"■",0],
+    }
+
+    const arrow = {
+        'r' : 'right',
+        'R' : 'Right',
+        'l' : 'left',
+        'L' : 'Left',
+        'lr':'leftright',
+        'Lr':'Leftright',
+        'u' : 'up',
+        'U' : 'Up',
+        'd' : 'down',
+        'D': 'Down',
+        'ud':'updown',
+        'Ud':'Updown',
+        'rr': 'longright',
+        'll': 'longleft',
+        'RR': 'Longright',
+        'LL': 'Longleft',
+        'se': 'se',
+        'sw': 'sw',
+        'ne': 'ne',
+        'nw': 'nw'
+    }
+
+
+endglobal
+
+
+
+
+
+
+
+
+##########################################################
+#                     Math Notation                      #
+##########################################################
+
+#### dots
+#
+# ... ⇨ \cdots
+# ,,, ⇨ \vdots
+# ... ⇨ \ddots
+
+context math(context)
+snippet `\.\.\.` "cdots" iA
+``rv='\\cdots '``
 endsnippet
 
-snippet fr "frac" 
-\\frac{${1:${VISUAL}}}{$2}
+context math(context)
+snippet `,,,` "vdots" iA
+``rv='\\vdots '``
 endsnippet
 
-snippet box "Box" 
-``rv = '┌' + '─'.repeat(t[0].length + 2) + '┐'``
-│ $1 │  
-``rv = '└' + '─'.repeat(t[0].length + 2) + '┘'``
+context math(context)
+snippet `:::` "ddots" iA
+``rv='\\ddots '``
 endsnippet
 
-snippet beg "LaTeX Begin/End"
-\\begin{${1:env}}
-$2
-\\end{$1}
+#### integral  & Big Operators
+#
+# int   ⇨ \int   ║ ∫
+# iint  ⇨ \iint  ║ ∫∫
+# iiint ⇨ \iiint ║ ∫∫∫
+# oint  ⇨ \oint  ║ ∮
+# oiint ⇨ \oiint ║ ∯
+
+context math(context)
+priority 10
+snippet `(?<=[^s])(?<!\\)[iI]nt` "int" iA
+\\int
 endsnippet
 
-snippet ii "LaTeX Inline Math (Dollars)" 
-$ ${1:your math formula} $ $0
+context math(context)
+priority 20
+snippet `[\\]?iint` "iint" iA
+\\iint
 endsnippet
 
-snippet dd "LaTeX Display Math (Dollars)" 
-$$
-$1
-$$$0
+context math(context)
+priority 100000
+snippet `[\\]?iiint` "iiint" iA
+\\iiint
 endsnippet
 
-snippet img "LaTeX Insert Image" 
-\\begin{figure}[htbp]
-\\centering
-\\includegraphics[width=0.8\\textwidth]{$1}
-\\caption{$2}
-\\label{fig:$3}
-\\end{figure}
-$0
+context math(context)
+priority 200000
+snippet `(?<!\\)oint` "oint" iA
+\\oint
 endsnippet
 
-snippet up "superscript" iAm
+context math(context)
+priority 200000
+snippet `[\\]?oiint` "oiint" iA
+\\oiint
+endsnippet
+
+
+# lim;      ⇨ \lim
+# sum;      ⇨ \sum
+# intd     ⇨ int_{▮}^{▮}
+# limd     ⇨ lim_{▮ \to ▮}
+# \inta     ⇨ \int a
+# \lim sup ⇨ \limsup
+
+context math(context)
+snippet `(?<!\\)(lim|sum);` "lim" iA
+\\``rv=m[1]``
+endsnippet
+
+
+context math(context)
+snippet `(lim|limsup|liminf)d` "lim and limsup" iA
+``rv=m[1]``_{$1 \\to $2}$0
+endsnippet
+
+
+context math(context)
+snippet `(int|bigcap|bigcup|sum)d` "sum and int" iA
+``rv=m[1]``_{$1}^{$2}
+endsnippet
+
+
+context math(context)
+snippet `(?<=\\lim)[ ]?(inf|sup)` "limsup&liminf" iA
+``rv=m[1]``
+endsnippet
+
+context math(context)
+snippet `(int|\\lim|\\sum)([a-ce-zA-CE-Z])` "space after int" iA
+``rv=m[1]+" "+m[2]``
+endsnippet
+
+
+#### infinity
+#
+# oo      ⇨ \infty
+
+
+context math(context)
+snippet `oo` "infinity" iA
+\\infty
+endsnippet
+
+
+
+#### derivative & partiAl derivative
+#
+# DD  ⇨ \frac{\mathrm{d}▮}{\mathrm{d}▮}  ║ 𝗱▮/𝗱▮
+# PP  ⇨ \frac{\partiAl ▮}{\partiAl ▮}    ║ ∂▮/∂▮
+# drm ⇨ \mathrm{\,d}                      ║  𝗱        ║ `priority 200` for ×⇨ \overline{h}
+# ptl ⇨ \partiAl                          ║  ∂
+
+
+context math(context)
+snippet `DD` "diffraction" iA
+\\frac{\\mathrm{d}$1}{\\mathrm{d}$2}
+endsnippet
+
+context math(context)
+snippet `PP` "partiAl diffraction" iA
+\\frac{\\partiAl $1}{\\partiAl $2}
+endsnippet
+
+
+context math(context)
+priority 200
+snippet `(\w)?drm` "dif" iA
+``rv=m[1]?(m[1]+" "):""``\\mathrm{\\,d}
+endsnippet
+
+context math(context)
+snippet `ptl` "partiAl" iA
+``rv="\\partiAl "``
+endsnippet
+
+
+
+#### Arrows
+#### use `arrow` dictionary
+#
+# ra; ⇨ \rightarrow
+# iA; ⇨ \implies
+# fa; ⇨ \iff
+# to; ⇨ \to
+# la; ⇨ \leftarrow
+# da; ⇨ \downarrow
+# ua; ⇨ \uparrow
+# lr; ⇨ \leftrightarrow
+
+
+
+context math(context)
+priority 10
+
+snippet `(r|R|l|L|lr|Lr|u|U|d|D|ud|Ud|rr|ll|RR|LL|se|sw|ne|nw)a;` "arrows" iA
+``rv="\\"+arrow[m[1]]+"arrow ";``
+endsnippet
+
+
+context math(context)
+snippet `iA;` "implies" iA
+``rv='\\implies '``
+endsnippet
+
+context math(context)
+snippet `fa;` "iff" iA
+``rv='\\iff '``
+endsnippet
+
+context math(context)
+snippet `to;` "to" iA
+``rv='\\to '``
+endsnippet
+
+context math(context)
+snippet `la;` "leftarrow" iA
+``rv='\\leftarrow '``
+endsnippet
+
+context math(context)
+snippet `da;` "downarrow" iA
+``rv='\\downarrow '``
+endsnippet
+
+context math(context)
+snippet `ua;` "uparrow" iA
+``rv='\\uparrow '``
+endsnippet
+
+context math(context)
+snippet `lr;` "leftrightarrow" iA
+``rv='\\leftrightarrow '``
+endsnippet
+
+
+
+
+#### greater & less notations
+#
+# <= ⇨ \leq
+# >= ⇨ \geq
+# << ⇨ \ll
+# >> ⇨ \gg
+# >~ ⇨ \lesssim
+# <~ ⇨ \gtrsim
+
+context math(context)
+snippet `>=` "≥" iA
+``rv='\\geq '``
+endsnippet
+
+context math(context)
+snippet `<=` "≤" iA
+``rv='\\leq '``
+endsnippet
+
+context math(context)
+snippet `<<` "≪" iA
+``rv='\\ll '``
+endsnippet
+
+context math(context)
+snippet `>>` "≫" iA
+``rv='\\gg '``
+endsnippet
+
+context math(context)
+snippet `<~` "≲" iA
+``rv='\\lesssim '``
+endsnippet
+
+context math(context)
+snippet `>~` "≳" iA
+``rv='\\gtrsim '``
+endsnippet
+
+
+
+
+
+#### Square
+#
+# sq    ⇨ \sqrt{▮}
+
+context math(context)
+snippet `(?<!\\)sq` "square" iA
+\\sqrt{$1}
+endsnippet
+
+#### set notations
+#
+# RR            ⇨ \mathbb{R}     ║  ℝ
+# CC            ⇨ \mathbb{C}     ║  ℂ
+# ZZ            ⇨ \mathbb{Z}     ║  ℤ
+# NN            ⇨ \mathbb{N}     ║  ℕ
+# QQ            ⇨ \mathbb{Q}     ║  ℚ
+# \mathbb{R}+   ⇨ \mathbb{R}_+   (RR+ ⇨ ℝ⁺)
+# \mathbb{R}n   ⇨ \mathbb{R}^n   (RRn ⇨ ℝⁿ)
+# \mathbb{R}3   ⇨ \mathbb{R}^3   (RR3 ⇨ ℝ³)
+
+context math(context)
+priority 9000000
+snippet `RR|CC|ZZ|NN|QQ` "sets" iA
+\\mathbb{``rv=m[0].charAt(0)``}
+endsnippet
+
+
+context math(context)
+priority 2000000
+snippet `(\\mathbb\{R\})([mnkl\d])` "rset^n" iA
+\\mathbb{R}^{``rv=m[2]``}
+endsnippet
+
+
+context math(context)
+priority 2000000
+snippet `(\\mathbb\{R\})\+` "rset_+" iA
+\\mathbb{R}_+
+endsnippet
+
+
+
+
+#### Binary Operation & Relation Symbols
+#
+# == ⇨ \equiv   ║     ≡
+# OO ⇨ \cdot    ║     ·
+# ~~ ⇨ \sim     ║     ~
+# NN ⇨ \cap     ║     ∩
+# UU ⇨ \cup     ║     ∪
+# II ⇨ \in      ║     ∈
+# XX ⇨ \times   ║     ×
+# opo ⇨ \oplus  ║     ⊕
+# oxo ⇨ \otimes ║     ⊗
+# omo ⇨ \ominus ║     ⊖
+# oco ⇨ \propto ║     ∝
+
+
+context math(context)
+ && !isAlignedEnvironment(editor)
+snippet `==` "xlongequal" iA
+\\equiv``rv=' '``
+endsnippet
+
+context math(context)
+snippet `OO` "cdot" iA
+\\cdot``rv=' '``
+endsnippet
+
+context math(context)
+snippet `~~` "sim" iA
+\\sim``rv=' '``
+endsnippet
+
+context math(context)
+snippet `NN` "cap" iA
+\\cap``rv=' '``
+endsnippet
+
+context math(context)
+snippet `UU` "cup" iA
+\\cup``rv=' '``
+endsnippet
+
+context math(context)
+snippet `II` "in" iA
+\\in``rv=' '``
+endsnippet
+
+context math(context)
+snippet `XX` "times" iA
+\\times``rv=' '``
+endsnippet
+
+context math(context)
+snippet `OP` "oplus" iA
+\\oplus``rv=' '``
+endsnippet
+
+context math(context)
+snippet `omo` "oplus" iA
+\\ominus``rv=' '``
+endsnippet
+
+context math(context)
+snippet `oxo` "otimes" iA
+\\otimes``rv=' '``
+endsnippet
+
+context math(context)
+snippet `oco` "oplus" iA
+\\propto``rv=' '``
+endsnippet
+
+
+#### other operators and notations
+#
+# nbl ⇨ \nable          ║   ▽
+# AA  ⇨ \forall         ║   ∀
+# EE  ⇨ \exist          ║   ∃
+# abs ⇨ \left|▮\right|
+# ||  ⇨ \left|▮\right|
+# VV  ⇨ \times 10^{▮}  ║   ×10▘
+# !=  ⇨ \not =          ║   ≠
+
+context math(context)
+snippet `(\\?)(nbl)` "nabla" iA
+``rv='\\\\nabla '``
+endsnippet
+
+context math(context)
+snippet `AA` "forall" iA
+\\forall``rv=' '``
+endsnippet
+
+context math(context)
+snippet `EE` "exist" iA
+\\exist``rv=' '``
+endsnippet
+
+context math(context)
+snippet `(\|\||abs)` "abs" iA
+\\left|$1\\right|$0
+endsnippet
+
+context math(context)
+snippet `(?<=(\$)?)VV` "*10^{}" iA
+``rv=m[1]?"":"\\\\times "``10^{$1}$0
+endsnippet
+
+context math(context)
+snippet `\!=` "not =" iA
+\\not =
+endsnippet
+
+
+
+
+#########################################################
+#                      Greek letter                     #
+#########################################################
+
+#### Greek letter
+#### use `greek` dictionary
+#
+# alpha ⇨ \alpha ║ α
+# a;    ⇨ \alpha ║ α
+
+context math(context)
+snippet `[\\]?(alpha|beta|chi|delta|epsilon|varepsilon|phi|varphi|gamma|eta|iota|kappa|varkappa|lambda|mu|nu|omicron|pi|varpi|theta|vartheta|rho|sigma|varsigma|tau|upsilon|omega|xi|psi|zeta|Alpha|Beta|Chi|Delta|Epsilon|Phi|Gamma|Eta|Iota|Kappa|Lambda|Mu|Nu|Omicron|Pi|Theta|Rho|Sigma|Tau|Upsilon|Omega|Xi|Psi|Zeta)` "greek" iA
+\\``rv=m[1]``
+endsnippet
+
+context math(context)
+snippet `(?<![a-zA-Z])([a-zA-IK-UW-Z]|v[efkpqs]);` "greek" iA
+``rv=greek[m[1]];``
+endsnippet
+
+#### var perfix
+#
+# phivar ⇨ \varphi
+
+context math(context)
+snippet `\\(epsilon|phi|pi|sigma|theta|kappa)[ ]?var` "var greek" iA
+\\var``rv=m[1]``
+endsnippet
+
+#### space after Greek letter
+#
+# \alphab ⇨ \alpha b
+
+context math(context)
+snippet `\\(alpha|beta|chi|delta|epsilon|varepsilon|phi|varphi|gamma|eta|iota|kappa|varkappa|lambda|mu|nu|omicron|pi|varpi|theta|vartheta|rho|sigma|varsigma|tau|upsilon|omega|xi|psi|zeta|Alpha|Beta|Chi|Delta|Epsilon|Phi|Gamma|Eta|Iota|Kappa|Lambda|Mu|Nu|Omicron|Pi|Theta|Rho|Sigma|Tau|Upsilon|Omega|Xi|Psi|Zeta)([a-zA-z])` "space after greek letter" iA
+``rv='\\\\'+m[1]+' '+m[2]``
+endsnippet
+
+
+
+
+#########################################################
+#                         fraction                      #
+#########################################################
+context math(context)
+ && !isUnitMode(editor)
+snippet `//` "Fraction" iA
+\\frac{$1}{$2}$0
+endsnippet
+
+context math(context)
+priority 10
+ && !isUnitMode(editor)
+snippet `((\d+)|(\d*)([A-Za-z]+|[a-zA-Z]?\\(alpha|beta|chi|delta|epsilon|varepsilon|phi|varphi|gamma|eta|iota|kappa|varkappa|lambda|mu|nu|omicron|pi|varpi|theta|vartheta|rho|sigma|varsigma|tau|upsilon|omega|xi|psi|zeta|Alpha|Beta|Chi|Delta|Epsilon|Phi|Gamma|Eta|Iota|Kappa|Lambda|Mu|Nu|Omicron|Pi|Theta|Rho|Sigma|Tau|Upsilon|Omega|Xi|Psi|Zeta))((\^|_)(\{\w+\}|\w)|')*)/` "Fraction " A
+\\frac{``rv = m[1]``}{$1}$0
+endsnippet
+
+
+
+
+
+#########################################################
+#                        prefix mode                    #
+#########################################################
+
+#### use `prefix` dictionary
+context math(context)
+snippet `((?<![_\^])\d+|((?<![_\^])\d*)([A-Za-z]+|\\(alpha|beta|chi|delta|epsilon|varepsilon|phi|varphi|gamma|eta|iota|kappa|varkappa|lambda|mu|nu|omicron|pi|varpi|theta|vartheta|rho|sigma|varsigma|tau|upsilon|omega|xi|psi|zeta|Alpha|Beta|Chi|Delta|Epsilon|Phi|Gamma|Eta|Iota|Kappa|Lambda|Mu|Nu|Omicron|Pi|Theta|Rho|Sigma|Tau|Upsilon|Omega|Xi|Psi|Zeta)[ ]?))(?<!\\)(bar|fn|td|rm|hat|cr|bav|vec|bm|bf|cal|dot|vdt|mtb)` "prefix mode" iA
+``
+let testPrefix = prefix[m[m.length-1]];
+rv = testPrefix[0] + m[1] + testPrefix[1];
+``
+endsnippet
+
+
+context math(context)
+priority 100
+snippet `((?<![_\^])\d+|(?:(?<![_\^])\d*)(?:[A-Za-z]+|\\(?:alpha|beta|chi|delta|epsilon|varepsilon|phi|varphi|gamma|eta|iota|kappa|varkappa|lambda|mu|nu|omicron|pi|varpi|theta|vartheta|rho|sigma|varsigma|tau|upsilon|omega|xi|psi|zeta|Alpha|Beta|Chi|Delta|Epsilon|Phi|Gamma|Eta|Iota|Kappa|Lambda|Mu|Nu|Omicron|Pi|Theta|Rho|Sigma|Tau|Upsilon|Omega|Xi|Psi|Zeta)[ ]?)[']*)(((\^|_)(\{\w+\}|\w))+)(?<!\\)(bar|fn|td|rm|hat|cr|bav|vec|bm|bf|cal|dot|vdt)` "prefix mode" iA
+``
+let testPrefix = prefix[m[m.length-1]];
+rv = testPrefix[0] + m[1] + testPrefix[1]+m[2];
+``
+endsnippet
+
+
+
+#########################################################
+#                Superscript & Subscript                #
+#########################################################
+
+#### Superscript
+#
+# pw  ⇨ ^{▮}
+
+
+context math(context)
+snippet `(?<!\\)pw` "^n" iA
 ^{$1}$0
 endsnippet
 
 
-snippet `\b([a-zA-Z])(\d)` "sub number" Am
-``rv = m[1]``_{``rv = m[2]``}
+
+
+#### Subscript
+#
+# sc        ⇨ _{▮}
+# a1        ⇨ a_1
+# a11       ⇨ a_{11}
+# rmm       ⇨ r_m
+# a_xx     ⇨ a_{xx}
+# \alpha mm ⇨ \alpha _m
+
+
+
+context math(context)
+snippet `(?<!(math|\\))sc` "script main" iA
+_{$1}$0
+endsnippet
+
+context math(context)
+snippet `([A-Za-z])(\d)` "auto subscript" iA
+`` rv = m[1] + "_" + m[2]``
+endsnippet
+
+context math(context)
+priority 100
+snippet `([A-Za-z])_(\d{2})` "auto subscript" iA
+`` rv = m[1] + "_{" + m[2] + "}$0" ``
+endsnippet
+
+context math(context)
+snippet `\b(?<!\\)([A-Za-z}])([A-Za-z])\2` "auto subscript 2" iA
+`` rv = m[1] + "_" + m[2].substring(0, 1) ``
+endsnippet
+
+context math(context)
+priority 10000
+snippet `(?<!\\)([A-Za-z])(_[A-Za-z]{2,})` "auto subscript 3" iA
+`` rv = m[1] + m[2].replace(/_/g, "_{") + "}" ``
+endsnippet
+
+context math(context)
+snippet `(?<!_)\\(alpha|beta|chi|delta|epsilon|varepsilon|phi|varphi|gamma|eta|iota|kappa|varkappa|lambda|mu|nu|omicron|pi|varpi|theta|vartheta|rho|sigma|varsigma|tau|upsilon|omega|xi|psi|zeta|Alpha|Beta|Chi|Delta|Epsilon|Phi|Gamma|Eta|Iota|Kappa|Lambda|Mu|Nu|Omicron|Pi|Theta|Rho|Sigma|Tau|Upsilon|Omega|Xi|Psi|Zeta)[']*[ ]?([a-z])\2{1}` "for \alpha_x" iA
+`` rv = '\\' + m[1] + "_" + m[2].substring(0, 1) ``
 endsnippet
 
 
-snippet `([a-zA-Z])_(\d\d)` "sub two numbers" Am
-``rv = m[1]``_{``rv = m[2]``}
+########################################################
+#                     Temp                             #
+########################################################
+
+#### autoclose bracket
+#
+# (  ⇨ ()
+# [  ⇨ []
+# {  ⇨ {}
+# \{ ⇨ \{\}
+
+context math(context)
+snippet `(?<!\\left)\(` "bracket" iA
+($1)$0
 endsnippet
 
-##############################################################################
-# Math Font
-##############################################################################
-
-
-snippet xt "LaTeX Italic Text" 
-\\textit{${1:italic text}}$0
-endsnippet
-
-snippet bt "LaTeX Bold Text" 
-\\textbf{${1:bold text}}$0
-endsnippet
-
-snippet tt "Latex text"
-\\text{${1:text}}$0      
+context math(context)
+snippet `(?<!\\left)\[` "bracket" iA
+[$1]$0
 endsnippet
 
 
-snippet RR "R" iAm
-\mathbb{R}
+context math(context)
+priority 100
+
+snippet `\{` "bracket" iA
+{$1}$0
 endsnippet
 
-snippet QQ "Q" iAm
-\mathbb{Q}
+
+context math(context)
+priority 100
+
+snippet `\\\[` "bracket" iA
+\\[$1\\]$0
 endsnippet
 
-snippet ZZ "Z" iAm
-\mathbb{Z}
+
+context math(context)
+priority 100
+
+snippet `\\\(` "bracket" iA
+\\($1\\)$0
 endsnippet
 
-snippet NN "NN" iAm
-\mathbb{N}
-endsnippet
 
-snippet CC "C" iAm
-\mathbb{C}
-endsnippet
+context math(context)
+priority 10000
 
-snippet mathbb "mathbb" iAm
-\mathbb{$1}
-endsnippet
-
-snippet mathcal "mathcal" iAm
-\mathcal{$1}
-endsnippet
-
-snippet mathfrak "mathfrak" iAm
-\mathfrak{$1}
-endsnippet
-
-snippet mathrm "mathrm" iAm
-\mathrm{$1}
-endsnippet
-
-snippet operatorname "operatorname" iAm
-\operatorname{$1}
-endsnippet
-
-##############################################################################
-# Symbols
-##############################################################################
-
-
-snippet alpha "Greek Letter Alpha" m
-\\alpha
-endsnippet
-
-snippet beta "Greek Letter Beta" m 
-\\beta
-endsnippet
-
-snippet gamma "Greek Letter Gamma" m
-\\gamma
-endsnippet
-
-snippet delta "Greek Letter Delta" m 
-\\delta
-endsnippet
-
-snippet Gamma "Greek Letter Gamma Uppercase" m
-\\Gamma
-endsnippet
-
-snippet Delta "Greek Letter Delta Uppercase" m
-\\Delta
-endsnippet
-
-snippet epsilon "Greek Letter Epsilon" m
-\\epsilon
-endsnippet
-
-snippet zeta "Greek Letter Zeta" m
-\\zeta
-endsnippet
-
-snippet eta "Greek Letter Eta" m
-\\eta
-endsnippet
-
-snippet theta "Greek Letter Theta" m
-\\theta
-endsnippet
-
-snippet iota "Greek Letter Iota" m
-\\iota
-endsnippet
-
-snippet kappa "Greek Letter Kappa" m
-\\kappa
-endsnippet
-
-snippet lambda "Greek Letter Lambda" m
-\\lambda
-endsnippet
-
-snippet mu "Greek Letter Mu" m
-\\mu
-endsnippet
-
-snippet nu "Greek Letter Nu" m
-\\nu
-endsnippet
-
-snippet Lambda "Greek Letter Lambda Uppercase" m
-\\Lambda
-endsnippet
-
-snippet pi "Greek Letter Pi" m
-\\pi
-endsnippet
-
-snippet rho "Greek Letter Rho" m
-\\rho
-endsnippet
-
-snippet sigma "Greek Letter Sigma" m
-\\sigma
-endsnippet
-
-snippet tau "Greek Letter Tau" m
-\\tau
-endsnippet
-
-snippet phi "Greek Letter Phi" m
-\\phi
-endsnippet
-
-snippet chi "Greek Letter Chi" m
-\\chi
-endsnippet
-
-snippet psi "Greek Letter Psi" m
-\\psi
-endsnippet
-
-snippet omega "Greek Letter Omega" m
-\\omega
-endsnippet
-
-snippet Sigma "Greek Letter Sigma Uppercase" m
-\\Sigma
-endsnippet
-
-snippet Pi "Greek Letter Pi Uppercase" m
-\\Pi
-endsnippet
-
-snippet Phi "Greek Letter Phi Uppercase" m
-\\Phi
-endsnippet
-
-snippet Psi "Greek Letter Psi Uppercase" m
-\\Psi
-endsnippet
-
-snippet Omega "Greek Letter Omega Uppercase" m
-\\Omega
-endsnippet
-
-snippet varphi "Greek Letter Varphi" m
-\\varphi
-endsnippet
-
-snippet cup "Union" m
-\\cup
-endsnippet
-
-snippet cap "Intersection" m
-\\cap
-endsnippet
-
-snippet cdot "Centered Dot" m
-\\cdot
-endsnippet
-
-snippet cdots "Centered Dots" m
-\\cdots
+snippet `(?<!\\left)\\\{` "bracket" iA
+\\{$1\\}$0
 endsnippet
 
 
 
-##############################################################################
-# Special snippets
-##############################################################################
 
-snippet pe "LaTeX Proposition Environment"
+
+
+
+#########################################################
+#                for Notes of Heenger point             #
+#########################################################
+
+### begin environment
+#
+# be ⇨ \begin{env} ▮ \end{env}
+
+snippet be "begin environment" 
+\\begin{$1}
+    $2
+\\end{$1}
+endsnippet
+
+### proposition environment
+#
+# pe ⇨ \begin{proposition} ▮ \end{proposition}
+
+
+snippet pe "proposition environment" 
 \\begin{proposition}
-$1
+    $1
 \\end{proposition}
-$0
 endsnippet
 
-snippet ee "LaTeX Example Environment" 
-\\begin{example}
-$1
-\\end{example}
-$0
+### thereom environment
+#
+# te ⇨ \begin{theorem} ▮ \end{theorem}
+
+
+snippet te "theorem environment" 
+\\begin{theorem}
+    $1
+\\end{theorem}
 endsnippet
 
-snippet bd "LaTeX bold Definition text"
-\\textbf{Definition.} 
+### mynotes environment
+#
+# me ⇨ \begin{mynotes} ▮ \end{mynotes}
+
+snippet me "mynotes environment" 
+\\begin{mynotes}
+    $1
+\\end{mynotes}
 endsnippet
+
+### Example environment
+#
+# ee ⇨ \begin{example} ▮ \end{example}
+
+snippet ee "example environment" 
+\\begin{Example}
+    $1
+\\end{Example}
+endsnippet
+
+### math font character
+#
+# mb; ⇨ \mathbb{▮}
+# cal ⇨ \mathcal{▮}
+# frak ⇨ \mathfrak{▮}
+# scr ⇨ \mathscr{▮}
+
+context math(context)
+snippet `mb;` "mathbb" iA
+\\mathbb{$1}$0
+endsnippet
+
+context math(context)
+snippet `cal` "mathcal" iA
+\\mathcal{$1}$0
+endsnippet
+
+context math(context)
+snippet `frak` "mathfrak" iA
+\\mathfrak{$1}$0
+endsnippet
+
+context math(context)
+snippet `scr` "mathscr" iA
+\\mathscr{$1}$0
+endsnippet
+
+### font character
+#
+# bt ⇨ \textbf{▮}
+# xt ⇨ \textit{▮}
+# tt ⇨ \text{▮}
+
+
+snippet bt "textbf" 
+\\textbf{$1}$0
+endsnippet
+
+snippet xt "textit" 
+\\textit{$1}$0
+endsnippet
+
+context math(context)
+snippet tt "text" 
+\\text{$1}$0
+endsnippet
+
+### bold Definition.
+#
+# bd ⇨ \textbf{Definition.} ▮
+
+snippet bd "bold Definition." 
+\\textbf{Definition.} $1
+endsnippet
+
+### img 
+#
+# img ⇨ \begin{figure}[H]
+#
+
+snippet img "img" 
+\\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{$1}
+    \caption{$2}
+    \label{fig:$3}
+\\end{figure}
+endsnippet
+
+### inline math mode
+#
+# i- ⇨ $▮$
+#
+context text(context)
+snippet i- "inline math mode" A
+\\( $0\\)
+endsnippet
+
+### center line math mode
+#
+# d- ⇨ $$▮$$
+#
+context text(context)
+snippet d- "center line math mode" A
+\\[ $0\\]
+endsnippet
+
+
+### operatorname
+#
+# op ⇨ \operatorname{▮}
+#
+
+context math(context)
+snippet `op;` "operatorname" iA
+\\operatorname{$1}$0
+endsnippet
+
+### inverse limit 
+#
+# ilim ⇨ \varprojlim_{▮} ▮
+#
+
+context math(context)
+snippet `ilim` "inverse limit" iA
+\\varprojlim_{$1}$0
+endsnippet
+
+### direct limit
+#
+# dlim ⇨ \varinjlim_{▮} ▮
+#
+
+context math(context)
+snippet `dlim` "direct limit" iA
+\\varinjlim_{$1}$0
+endsnippet
+
+
+
+#########################################################
+#                for Notes of L-funtion                 #
+#########################################################
+
+### group of G_{Q,S}
+#
+# GQS ⇨ \G_{\mathbb{Q},S}
+#
+
+context math(context)
+snippet `GQS` "G_{Q,S}" iA
+G_{\mathbb{Q},S}
+endsnippet
+
+### Homorphism
+#
+# Hom ⇨ \operatorname{Hom}
+#
+
+context math(context)
+snippet `Hom` "Hom" iA
+\\operatorname{Hom}
+endsnippet
+
+### Endomorphism
+#
+# End ⇨ \operatorname{End}
+#
+
+context math(context)
+snippet `End` "End" iA
+\\operatorname{End}
+endsnippet
+
+### p-adic 
+#
+# p-adic ⇨ \(p\)-adic
+#
+
+snippet p-adic "p-adic" i 
+\\(p\\)-adic
+endsnippet
+
+### Z_p 
+#
+# Zp ⇨ \mathbb{Z}_p
+#
+
+context math(context)
+snippet `Zp` "Z_p" iA
+\\mathbb{Z}_p
+endsnippet
+
+### Q_p
+#
+# Qp ⇨ \mathbb{Q}_p
+#
+
+context math(context)
+snippet `Q_p` "Q_p" iA
+\\mathbb{Q}_p
+endsnippet
+
+### stackrel map
+#
+# sto ⇨ \stackrel{▮}{▮}
+#
+
+context math(context)
+snippet `sto` "stackrel map" iA
+\\stackrel{$1}{$2}
+endsnippet
+
+### Kernel
+#
+# Ker ⇨ \operatorname{Ker}
+#
+
+context math(context)
+snippet `Ker` "Ker" iA
+\\operatorname{Ker}
+endsnippet
+
+### Coker
+#
+# Coker ⇨ \operatorname{Coker}
+#
+
+context math(context)
+snippet `Coker` "Coker" iA
+\\operatorname{Coker}
+endsnippet
+
+### Im
+#
+# Im ⇨ \operatorname{Im}
+#
+
+context math(context)
+snippet `Im` "Im" iA
+\\operatorname{Im}
+endsnippet
+
+
+### Ext 
+#
+# Ext ⇨ \operatorname{Ext}
+#
+
+context math(context)
+snippet `Ext` "Ext" iA
+\\operatorname{Ext}
+endsnippet
+
+
+#########################################################
+#               Modular Form                            #
+#########################################################
+
+### moudlar form
+#
+# Mk_1 ⇨ M_k(\Gamma_{1}(N))
+# Mk_0 ⇨ M_k(\Gamma_{0}(N))
+# Mkn  ⇨ M_k(\Gamma(N))
+
+context math(context)
+priority 100000
+snippet `Mk1` "Modular form" iA
+M_k(\Gamma_{1}(N))$0
+endsnippet
+
+context math(context)
+priority 100000
+snippet `Mk0` "Modular form" iA
+M_k(\Gamma_{0}(N))$0
+endsnippet
+
+context math(context)
+snippet `Mkn` "Modular form" iA
+M_k(\Gamma(N))$0
+endsnippet
+
+### cuspical form
+#
+# Sk1 ⇨ S_k(\Gamma_{1}(N))
+# Sk0 ⇨ S_k(\Gamma_{0}(N))
+# Skn  ⇨ S_k(\Gamma(N))
+
+context math(context)
+priority 100000
+snippet `Sk1` "cuspical form" iA
+S_k(\Gamma_{1}(N))$0
+endsnippet
+
+context math(context)
+priority 100000
+snippet `Sk0` "cuspical form" iA
+S_k(\Gamma_{0}(N))$0
+endsnippet
+
+
+context math(context)
+snippet `Skn` "cuspical form" iA
+S_k(\Gamma(N))$0
+endsnippet
+
+### Eisenstein series
+#
+# Ek_1 ⇨ E_k(\Gamma_{1}(N))
+#
+context math(context)
+priority 100000
+snippet `Ek1` "Eisenstein series" iA
+\\mathcal{E}_k(\Gamma_{1}(N))$0
+endsnippet
+
+#########################################################
+# Special for eigencure
+
+### modular form with omega weight, level Gamma 1(N), and coefficient in K 
+#
+# MwK ⇨ M_{\omega}(\Gamma_{1}(N),K)
+#
+
+context math(context)
+snippet `MwK` "Modular form" iA
+M_{\\omega}(\Gamma_{1}(N),K)$0
+endsnippet
+
+### cuspical modular form with omega weight, level Gamma 1(N), and coefficient in K 
+#
+# SwK ⇨ M_{\omega}(\Gamma_{1}(N),K)
+#
+context math(context)
+snippet `SwK` "cuspical form" iA
+S_{\\omega}(\Gamma_{1}(N),K)$0
+endsnippet
+
+
+### Galois group of maximal extension outside of Np
+#
+# GQN ⇨ G_{\mathbb{Q},Np}
+#
+
+context math(context)
+snippet `GQN` "G_{Q,Np}" iA
+G_{\\mathbb{Q},Np}
+endsnippet
+
+########################################################
+#     operatorname systle words                        #
+########################################################
+
+### Spectral 
+#
+# Spec ⇨ \operatorname{Spec}
+#
+context math(context)
+snippet `Spec` "Spec" iA
+\\operatorname{Spec}
+endsnippet
+
+### Galois group
+#
+# Gal ⇨ \operatorname{Gal}
+#
+context math(context)
+snippet `Gal` "Gal" iA
+\\operatorname{Gal}
+endsnippet
+
+### Aut
+#
+# Aut ⇨ \operatorname{Aut}
+#
+context math(context)
+snippet `Aut` "Aut" iA
+\\operatorname{Aut}
+endsnippet
+
+### GL
+#
+# GL ⇨ \operatorname{GL}
+#
+context math(context)
+snippet `GL` "GL" iA
+\\operatorname{GL}
+endsnippet
+
+
+### Proj
+#
+# Proj ⇨ \operatorname{Proj}
+#
+
+context math(context)
+snippet `Proj` "Proj" iA
+\\operatorname{Proj}
+endsnippet
+
+
+
+### surjective arrow
+#
+# sa; ⇨ \twoheadrightarrow
+#
+context math(context)
+snippet `sa;` "surjective arrow" iA
+\\twoheadrightarrow
+endsnippet
+
+
+### injective arrow
+#
+# ina; ⇨ \hookrightarrow
+#
+context math(context)
+snippet `ina;` "injective arrow" iA
+\\hookrightarrow
+endsnippet
+
+
+
+### time and otimes
+#
+# XX ⇨ \times
+# OX ⇨ \otimes
+#
+context math(context)
+snippet `XX` "times" iA
+\\times
+endsnippet
+
+context math(context)
+snippet `OX` "otimes" iA
+\\otimes
+endsnippet
+
+
+### subset
+#
+#
+# sub ⇨ subset
+#
+context math(context)
+snippet `sub` "subset" iA
+\\subset
+endsnippet
+
+
+
+
+### Auto take alone character as math
+
+
+context text(context)
+snippet `([^'])\b((?![aAI])[a-zA-Z])\b([\n\s\.,])` "Treat lone characters as math (except a, A, I)" wA
+``rv =m[1]``\\(``rv=m[2]``\\)``rv=m[3]``
+endsnippet
+
 
