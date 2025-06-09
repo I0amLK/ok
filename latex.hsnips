@@ -35,7 +35,11 @@ endglobal
 
 global
 function math(context) {
-    return context.scopes.some(s => s.startsWith("meta.math"));
+  return context.scopes.some(s =>
+    s.startsWith("meta.environment.math") ||   // display / inline math
+    s.startsWith("meta.math")              ||   // legacy scopes
+    s.startsWith("string.other.math")          // very old grammars
+  );
 }
 endglobal
 
@@ -117,9 +121,9 @@ global
         "bm"  : ["\\\\boldsymbol{"           ,"}"   ],
         "bf"  : ["\\\\mathbf{"               ,"}"   ],
         "cal" : ["\\\\mathcal{"              ,"}"   ],
-        "dot"  : ["\\\\dot{"                  ,"}"   ],
-        "vdot" : ["\\\\dot{\\\\boldsymbol{"   ,"}}"  ],
-        "mtb" : ["\\\\mathbb{"               ,"}"    ]
+        "mtb" : ["\\\\mathbb{"               ,"}"    ],
+        "op"  : ["\\\\operatorname{"           ,"}"   ],
+        "fk"  : ["\\\\mathfrak{"             ,"}"   ],
     }
 
     //  block
@@ -441,10 +445,16 @@ endsnippet
 # \mathbb{R}3   ⇨ \mathbb{R}^3   (RR3 ⇨ ℝ³)
 
 context math(context)
-priority 9000000
-snippet `RR|CC|ZZ|NN|QQ` "sets" iA
-\\mathbb{``rv=m[0].charAt(0)``}
+priority -10000
+snippet `([A-Z])\1` "mathbb style for double capital letters" bA
+\\mathbb{``rv=m[1]``}
 endsnippet
+
+# context math(context)
+# priority 9000000
+# snippet `RR|CC|ZZ|NN|QQ` "sets" iA
+# \\mathbb{``rv=m[0].charAt(0)``}
+# endsnippet
 
 
 context math(context)
@@ -525,14 +535,16 @@ snippet `omo` "oplus" iA
 endsnippet
 
 context math(context)
-snippet `oxo` "otimes" iA
+snippet `OX` "otimes" iA
 \\otimes``rv=' '``
 endsnippet
 
 context math(context)
-snippet `oco` "oplus" iA
+snippet `OP` "oplus" iA
 \\propto``rv=' '``
 endsnippet
+
+
 
 
 #### other operators and notations
@@ -573,6 +585,11 @@ endsnippet
 context math(context)
 snippet `\!=` "not =" iA
 \\not =
+endsnippet
+
+context math(context)
+snippet `tt` "text" iA
+\\text{$1}$0
 endsnippet
 
 
@@ -645,7 +662,7 @@ endsnippet
 
 #### use `prefix` dictionary
 context math(context)
-snippet `((?<![_\^])\d+|((?<![_\^])\d*)([A-Za-z]+|\\(alpha|beta|chi|delta|epsilon|varepsilon|phi|varphi|gamma|eta|iota|kappa|varkappa|lambda|mu|nu|omicron|pi|varpi|theta|vartheta|rho|sigma|varsigma|tau|upsilon|omega|xi|psi|zeta|Alpha|Beta|Chi|Delta|Epsilon|Phi|Gamma|Eta|Iota|Kappa|Lambda|Mu|Nu|Omicron|Pi|Theta|Rho|Sigma|Tau|Upsilon|Omega|Xi|Psi|Zeta)[ ]?))(?<!\\)(bar|fn|td|rm|hat|cr|bav|vec|bm|bf|cal|dot|vdt|mtb)` "prefix mode" iA
+snippet `((?<![_\^])\d+|((?<![_\^])\d*)([A-Za-z]+|\\(alpha|beta|chi|delta|epsilon|varepsilon|phi|varphi|gamma|eta|iota|kappa|varkappa|lambda|mu|nu|omicron|pi|varpi|theta|vartheta|rho|sigma|varsigma|tau|upsilon|omega|xi|psi|zeta|Alpha|Beta|Chi|Delta|Epsilon|Phi|Gamma|Eta|Iota|Kappa|Lambda|Mu|Nu|Omicron|Pi|Theta|Rho|Sigma|Tau|Upsilon|Omega|Xi|Psi|Zeta)[ ]?))(?<!\\)(bar|fn|td|rm|hat|cr|bav|vec|bm|bf|cal|vdt|mtb|fk|op)` "prefix mode" iA
 ``
 let testPrefix = prefix[m[m.length-1]];
 rv = testPrefix[0] + m[1] + testPrefix[1];
@@ -655,7 +672,7 @@ endsnippet
 
 context math(context)
 priority 100
-snippet `((?<![_\^])\d+|(?:(?<![_\^])\d*)(?:[A-Za-z]+|\\(?:alpha|beta|chi|delta|epsilon|varepsilon|phi|varphi|gamma|eta|iota|kappa|varkappa|lambda|mu|nu|omicron|pi|varpi|theta|vartheta|rho|sigma|varsigma|tau|upsilon|omega|xi|psi|zeta|Alpha|Beta|Chi|Delta|Epsilon|Phi|Gamma|Eta|Iota|Kappa|Lambda|Mu|Nu|Omicron|Pi|Theta|Rho|Sigma|Tau|Upsilon|Omega|Xi|Psi|Zeta)[ ]?)[']*)(((\^|_)(\{\w+\}|\w))+)(?<!\\)(bar|fn|td|rm|hat|cr|bav|vec|bm|bf|cal|dot|vdt)` "prefix mode" iA
+snippet `((?<![_\^])\d+|(?:(?<![_\^])\d*)(?:[A-Za-z]+|\\(?:alpha|beta|chi|delta|epsilon|varepsilon|phi|varphi|gamma|eta|iota|kappa|varkappa|lambda|mu|nu|omicron|pi|varpi|theta|vartheta|rho|sigma|varsigma|tau|upsilon|omega|xi|psi|zeta|Alpha|Beta|Chi|Delta|Epsilon|Phi|Gamma|Eta|Iota|Kappa|Lambda|Mu|Nu|Omicron|Pi|Theta|Rho|Sigma|Tau|Upsilon|Omega|Xi|Psi|Zeta)[ ]?)[']*)(((\^|_)(\{\w+\}|\w))+)(?<!\\)(bar|fn|td|rm|hat|cr|bav|vec|bm|bf|cal|fk|op)` "prefix mode" iA
 ``
 let testPrefix = prefix[m[m.length-1]];
 rv = testPrefix[0] + m[1] + testPrefix[1]+m[2];
@@ -705,7 +722,7 @@ endsnippet
 context math(context)
 priority 100
 snippet `([A-Za-z])_(\d{2})` "auto subscript" iA
-`` rv = m[1] + "_{" + m[2] + "}$0" ``
+`` rv = m[1] + "_{" + m[2] + "}" ``
 endsnippet
 
 context math(context)
@@ -867,6 +884,20 @@ snippet `scr` "mathscr" iA
 \\mathscr{$1}$0
 endsnippet
 
+#### math font character
+
+context math(context)
+snippet `([a-zA-Z]|\d)mb` "blackboard bold" iA
+`` rv = "\\mathbb{" + m[1] + "}"  ``
+endsnippet
+
+# characterfk ---> frak(characters)
+
+
+
+# charactercal ---> cal(characters)
+
+
 ### font character
 #
 # bt ⇨ \textbf{▮}
@@ -889,11 +920,14 @@ endsnippet
 
 ### bold Definition.
 #
-# bd ⇨ \textbf{Definition.} ▮
-
-snippet bd "bold Definition." 
-\\textbf{Definition.} $1
+# eD ⇨ \begin{Def} 
+snippet eD "begin Def"
+\\begin{Def}
+    $1 
+\\end{Def}
 endsnippet
+
+
 
 ### img 
 #
@@ -1280,4 +1314,19 @@ snippet `([^'])\b((?![aAI])[a-zA-Z])\b([\n\s\.,])` "Treat lone characters as mat
 ``rv =m[1]``\\(``rv=m[2]``\\)``rv=m[3]``
 endsnippet
 
+
+
+### ord --> operatorname{ord} 
+
+context math(context)
+snippet `ord` "ord" iA
+\\operatorname{ord}
+endsnippet
+
+###-------------------------------------------------------------------------------------------------------------------------------------------------------- The snippets of coding theory ------------------------------------------------------------------------------------------------------------------------------------------
+
+context math(context)
+snippet `wt` "weight" iA
+\\operatorname{wt}
+endsnippet
 

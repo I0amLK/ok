@@ -1,0 +1,273 @@
+##########################################################
+#              Global JavaScript Function               #
+##########################################################
+
+
+
+global
+  function notMath(context) {
+      return !context.scopes.some(s => s.startsWith("meta.math"));
+  }
+endglobal
+
+global
+// Dic
+
+    // Greek Letter
+
+    const greek  = {
+            "a" : "alpha",
+            "b" : "beta",
+            "c" : "chi",
+            "d" : "delta",
+            "e" : "epsilon",
+            "f" : "phi.alt",
+            "vf": "phi",
+            "g" : "gamma",
+            "h" : "eta",
+            "i" : "iota",
+            "k" : "kappa",
+            "l" : "lambda",
+            "m" : "mu",
+            "n" : "nu",
+            "o" : "omicron",
+            "p" : "pi",
+            "q" : "theta",
+            "r" : "rho",
+            "s" : "sigma",
+            "t" : "tau",
+            "u" : "upsilon",
+            "w" : "omega",
+            "x" : "xi",
+            "y" : "psi",
+            "z" : "zeta",
+            "A" : "Alpha",
+            "B" : "Beta",
+            "C" : "Chi",
+            "D" : "Delta",
+            "E" : "Epsilon",
+            "F" : "Phi",
+            "G" : "Gamma",
+            "H" : "Eta",
+            "I" : "Iota",
+            "K" : "Kappa",
+            "L" : "Lambda",
+            "M" : "Mu",
+            "N" : "Nu",
+            "O" : "Omicron",
+            "P" : "Pi",
+            "Q" : "Theta",
+            "R" : "Rho",
+            "S" : "Sigma",
+            "T" : "Tau",
+            "U" : "Upsilon",
+            "W" : "Omega",
+            "X" : "Xi",
+            "Y" : "Psi",
+            "Z" : "Zeta"
+        };
+
+endglobal
+
+
+##########################################################
+#                     Math envir                         #
+##########################################################
+
+
+snippet i- "inline Math" iwA
+$${1}$ $0
+endsnippet
+
+snippet d- "display Math" iwA
+$ ${1} $$0
+endsnippet
+
+##########################################################
+#                     Dot Notation                      #
+##########################################################
+
+snippet cdots "centered dots" iAm
+dots.h.c 
+endsnippet
+
+
+##########################################################
+#                     Greek Symbols                      #   
+##########################################################
+
+
+snippet `(?<![a-zA-Z])([a-zA-IK-UW-Z]|v[efkpqs]);` "greek" iAm
+``rv=greek[m[1]];``
+endsnippet
+
+
+snippet `([A-Za-z\)])(\d)` "auto subscript" iAm
+`` rv = m[1] + "_" + m[2]``
+endsnippet
+
+snippet `([A-Za-z\)])_(\d{2})` "auto subscript" iAm
+`` rv = m[1] + "_(" + m[2] + ")" ``
+endsnippet
+
+snippet `(\)|mu|alpha|sigma|rho|beta|gamma|delta|zeta|eta|epsilon|theta|iota|kappa|vartheta|lambda|nu|pi|rho|tau|upsilon|phi|chi|psi|omega|Gamma|Delta|Theta|Lambda|Xi|Pi|Sigma|Upsilon|Phi|Psi|Omega)([acdijkmnpqrstABCDIJKMNPQRST])\2` "auto subscript for greek letter" iAm
+`` rv = m[1] + "_" + m[2].substring(0, 1) ``
+endsnippet
+
+# !+ ---> dagger 
+
+snippet `!+` "dagger" iAm
+dagger
+endsnippet
+
+##########################################################
+#                     Math index                       #
+##########################################################
+
+# si ---> _()
+# pw ---> ^()
+
+snippet `\bsi\b` "subscript" iAm
+_($1)$0
+endsnippet
+
+snippet pw "power" iAm
+^($1)$0
+endsnippet
+
+
+##########################################################
+#                     Math arrow                        #
+##########################################################
+
+# !> ---> |->
+
+snippet `!>` "mapsto" iAm
+|->
+endsnippet
+
+# sto ---> attach(-->,)
+
+snippet `sto` "map with top function" iAm
+attach(-->,t:$1)
+endsnippet
+
+# inj; ---> arrow.r.hook
+
+snippet `inj;` "injective arrow" iAm
+arrow.r.hook
+endsnippet
+
+# suj; ---> arrow.r.twohead
+
+snippet `suj;` "surjective arrow" iAm
+arrow.r.twohead
+endsnippet
+
+
+##########################################################
+#                     Math lim                            #
+##########################################################
+
+# ilim ---> attach(lim,d:<-)
+# dlim ---> attach(lim,d:->)
+
+snippet `ilim` "inverse lim" iAm
+attach(lim,b:attach(<--,b:$1)) 
+endsnippet
+
+snippet `dlim` "direct lim" iAm
+attach(lim,b:attach(-->,b:$1))
+endsnippet
+
+##########################################################
+#                     Other symbols                      #
+##########################################################
+
+# cong ---> tilde.equiv
+
+snippet `cong` "congruent" iAm
+tilde.equiv
+endsnippet
+
+# pm ---> plus.minus 
+
+snippet `pm` "plus minus" iAm
+plus.minus
+endsnippet
+
+# == ---> equiv
+
+snippet `==` "equivalent" iAm
+equiv
+endsnippet
+
+# XX ---> times
+
+snippet `XX` "times" iAm
+times
+endsnippet
+
+# OX ---> times.circle 
+
+snippet `OX` "times circle" iAm
+times.circle
+endsnippet
+
+
+##########################################################
+#                     Special symbols                    #
+##########################################################
+
+# Automatically treat lone characters as math (except a, A, I) 
+
+#context "!math(context)"
+#snippet `([^'])\b((?![aAIie])[a-zA-Z])\b([\n\s\.,])` "auto math" iwA
+#`` rv = m[1]+"\\$"+ m[2]+"\\$"+m[3] ``
+#endsnippet
+
+
+
+##########################################################
+#                     Sets and logic                     #
+##########################################################
+
+
+# cup ---> union
+# cap ---> sect 
+# sub ---> subset
+
+snippet `cup` "union" iAm
+union
+endsnippet
+
+snippet `cap` "sect" iAm
+sect
+endsnippet
+
+snippet `sub` "subset" iAm
+subset
+endsnippet
+
+##########################################################
+#                     Math fonts                        #
+##########################################################
+
+# charactersmb ---> bb(characters)
+
+snippet `([a-zA-Z]|\d)mb` "blackboard bold" iAm
+`` rv = "bb(" + m[1] + ")"  ``
+endsnippet
+
+# characterfk ---> frak(characters)
+
+snippet `([a-zA-Z]|\d)fk` "fraktur" iAm
+`` rv = "frak(" + m[1] + ")"  ``
+endsnippet
+
+# charactercal ---> cal(characters)
+
+snippet `([a-zA-Z]|\d)cal` "calligraphic" iAm
+`` rv = "cal(" + m[1] + ")"  ``
+endsnippet
+

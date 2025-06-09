@@ -1,0 +1,320 @@
+##########################################################
+#              Global JavaScript Function               #
+##########################################################
+
+# Define contexts for use
+# Use `> Inspect Editor Tokens and Scopes` to find out what context you're in
+global
+function math(context) { return context.scopes.some(s => s.startsWith("markup.math.typst"));}
+function comment(context) {return context.scopes.some(s => s.startsWith("comment"));}
+function code(context) {return context.scopes.some(s => s.startsWith("string.other.raw.typst") || s.startsWith("markup.raw.block.typst"));}
+function text(context) { return !(math(context) || comment(context) || code(context)); }
+endglobal
+
+
+# Define vscode variables for use
+global
+const vscode = require("vscode");
+var editor = vscode.window.activeTextEditor
+var document = editor.document
+endglobal
+
+global
+// Dic
+
+    // Greek Letter
+
+    const greek  = {
+            "a" : "alpha",
+            "b" : "beta",
+            "c" : "chi",
+            "d" : "delta",
+            "e" : "epsilon",
+            "f" : "phi.alt",
+            "vf": "phi",
+            "g" : "gamma",
+            "h" : "eta",
+            "i" : "iota",
+            "k" : "kappa",
+            "l" : "lambda",
+            "m" : "mu",
+            "n" : "nu",
+            "o" : "omicron",
+            "p" : "pi",
+            "q" : "theta",
+            "r" : "rho",
+            "s" : "sigma",
+            "t" : "tau",
+            "u" : "upsilon",
+            "w" : "omega",
+            "x" : "xi",
+            "y" : "psi",
+            "z" : "zeta",
+            "A" : "Alpha",
+            "B" : "Beta",
+            "C" : "Chi",
+            "D" : "Delta",
+            "E" : "Epsilon",
+            "F" : "Phi",
+            "G" : "Gamma",
+            "H" : "Eta",
+            "I" : "Iota",
+            "K" : "Kappa",
+            "L" : "Lambda",
+            "M" : "Mu",
+            "N" : "Nu",
+            "O" : "Omicron",
+            "P" : "Pi",
+            "Q" : "Theta",
+            "R" : "Rho",
+            "S" : "Sigma",
+            "T" : "Tau",
+            "U" : "Upsilon",
+            "W" : "Omega",
+            "X" : "Xi",
+            "Y" : "Psi",
+            "Z" : "Zeta"
+        };
+
+endglobal
+
+
+##########################################################
+#                     Math envir                         #
+##########################################################
+
+context text(context)
+snippet i- "inline Math" iwA
+$${1}$ $0
+endsnippet
+context text(context)
+snippet d- "display Math" iwA
+$ ${1} $$0
+endsnippet
+
+##########################################################
+#                     Dot Notation                      #
+##########################################################
+context math(context)
+snippet cdots "centered dots" iA
+dots.h.c 
+endsnippet
+
+
+##########################################################
+#                     Greek Symbols                      #   
+##########################################################
+
+context math(context)
+snippet `(?<![a-zA-Z])([a-zA-IK-UW-Z]|v[efkpqs]);` "greek" iA
+``rv=greek[m[1]];``
+endsnippet
+
+context math(context)
+snippet `([A-Za-z\)])(\d)` "auto subscript" iA
+`` rv = m[1] + "_" + m[2]``
+endsnippet
+
+context math(context)
+snippet `([A-Za-z\)])_(\d{2})` "auto subscript" iA
+`` rv = m[1] + "_(" + m[2] + ")" ``
+endsnippet
+
+context math(context)
+snippet `(\)|mu|alpha|sigma|rho|beta|gamma|delta|zeta|eta|epsilon|theta|iota|kappa|vartheta|lambda|nu|pi|rho|tau|upsilon|phi|chi|psi|omega|Gamma|Delta|Theta|Lambda|Xi|Pi|Sigma|Upsilon|Phi|Psi|Omega)([acdijkmnpqrstABCDIJKMNPQRST])\2` "auto subscript for greek letter" iA
+`` rv = m[1] + "_" + m[2].substring(0, 1) ``
+endsnippet
+
+# !+ ---> dagger 
+
+context math(context)
+snippet `!!` "dagger" iA
+dagger
+endsnippet
+
+##########################################################
+#                     Math index                       #
+##########################################################
+
+# si ---> _()
+# pw ---> ^()
+context math(context)
+snippet `\bsi\b` "subscript" iA
+_($1)$0
+endsnippet
+
+context math(context)
+snippet pw "power" iA
+^($1)$0
+endsnippet
+
+
+##########################################################
+#                     Math arrow                        #
+##########################################################
+
+# !> ---> |->
+
+context math(context)
+snippet `!>` "mapsto" iA
+|->
+endsnippet
+
+# sto ---> attach(-->,)
+
+context math(context)
+snippet `sto` "map with top function" iA
+attach(-->,t:$1)
+endsnippet
+
+# inj; ---> arrow.r.hook
+
+context math(context)
+snippet `inj;` "injective arrow" iA
+arrow.r.hook
+endsnippet
+
+# suj; ---> arrow.r.twohead
+
+context math(context)
+snippet `suj;` "surjective arrow" iA
+arrow.r.twohead
+endsnippet
+
+
+##########################################################
+#                     Math lim                            #
+##########################################################
+
+# ilim ---> attach(lim,d:<-)
+# dlim ---> attach(lim,d:->)
+
+context math(context)
+snippet `ilim` "inverse lim" iA
+attach(lim,b:attach(<--,b:$1)) 
+endsnippet
+
+context math(context)
+snippet `dlim` "direct lim" iA
+attach(lim,b:attach(-->,b:$1))
+endsnippet
+
+##########################################################
+#                     Other symbols                      #
+##########################################################
+
+# cong ---> tilde.equiv
+
+context math(context)
+snippet `cong` "congruent" iA
+tilde.equiv
+endsnippet
+
+# pm ---> plus.minus 
+
+context math(context)
+snippet `pm` "plus minus" iA
+plus.minus
+endsnippet
+
+# == ---> equiv
+
+context math(context)
+snippet `==` "equivalent" iA
+equiv
+endsnippet
+
+# XX ---> times
+
+context math(context)
+snippet `XX` "times" iA
+times
+endsnippet
+
+# OX ---> times.circle 
+
+context math(context)
+snippet `OX` "times circle" iA
+times.circle
+endsnippet
+
+
+##########################################################
+#                     Special symbols                    #
+##########################################################
+
+Automatically treat lone characters as math (except a, A, I) 
+context text(context)
+snippet `([^'])\b((?![aAIie])[a-zA-Z])\b([\n\s\.,])` "auto math" iwA
+`` rv = m[1]+"$"+ m[2]+"$"+m[3] ``
+endsnippet
+
+
+
+##########################################################
+#                     Sets and logic                     #
+##########################################################
+
+
+# cup ---> union
+# cap ---> sect 
+# sub ---> subset
+context math(context)
+snippet `cup` "union" iA
+union
+endsnippet
+
+context math(context)
+snippet `cap` "inter" iA
+sect
+endsnippet
+
+context math(context)
+snippet `sub` "subset" iA
+subset
+endsnippet
+
+##########################################################
+#                     Math fonts                        #
+##########################################################
+
+# charactersmb ---> bb(characters)
+
+context math(context)
+snippet `([a-zA-Z]|\d)mb` "blackboard bold" iA
+`` rv = "bb(" + m[1] + ")"  ``
+endsnippet
+
+# characterfk ---> frak(characters)
+
+context math(context)
+snippet `([a-zA-Z]|\d)fk` "fraktur" iA
+`` rv = "frak(" + m[1] + ")"  ``
+endsnippet
+
+# charactercal ---> cal(characters)
+
+context math(context)
+snippet `([a-zA-Z]|\d)cal` "calligraphic" iA
+`` rv = "cal(" + m[1] + ")"  ``
+endsnippet
+
+
+
+##########################################################
+#                     Math symbols                       #
+##########################################################
+
+
+# bar ---> overline
+
+context math(context)
+snippet `bar` "overline" iA
+overline
+endsnippet
+
+
+context math(context)
+snippet `\b(?<!\\)([A-Za-z}])([A-Za-z])\2` "auto subscript 2" iA
+`` rv = m[1] + "_" + m[2].substring(0, 1) ``
+endsnippet
