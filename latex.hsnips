@@ -34,14 +34,74 @@ function text(context) {
 endglobal
 
 global
+// 最近使用的 scopes 缓存，避免在大型文档中重复计算
+const scopeCache = new Map();
+const MAX_CACHE_SIZE = 100;
+
+// 文本或注释环境的前缀列表，用 startsWith 代替正则匹配
+const TEXT_PREFIXES = [
+  'meta.group.braces.text',
+  'meta.embedded.text',
+  'meta.text',
+  'comment'
+];
+
+// 排除常见非数学环境，使用非捕获分组并将出现频率更高的项排在前面
+const NON_MATH_ENV_REGEX = /\.(?:itemize|enumerate|list|theorem|lemma|proof|figure|table)\./;
+
+// 匹配数学环境
+const MATH_SCOPES_REGEX = /^(?:meta\.environment\.math|meta\.math|string\.other\.math)/;
+
+/**
+ * 判断当前编辑器上下文是否处于数学环境中。
+ * 在大型文档中，通过缓存最近结果减少重复遍历。
+ * @param {object} context - 包含 scopes 数组的上下文对象。
+ * @returns {boolean} - 在数学环境中返回 true，否则返回 false。
+ */
 function math(context) {
-  return context.scopes.some(s =>
-    s.startsWith("meta.environment.math") ||   // display / inline math
-    s.startsWith("meta.math")              ||   // legacy scopes
-    s.startsWith("string.other.math")          // very old grammars
-  );
+  if (!context || !Array.isArray(context.scopes) || context.scopes.length === 0) {
+    return false;
+  }
+
+  const key = context.scopes.join('|');
+  if (scopeCache.has(key)) {
+    return scopeCache.get(key);
+  }
+
+  let result = false;
+  // 从数组末尾向前遍历，优先检测最具体的 scope
+  for (let i = context.scopes.length - 1; i >= 0; i--) {
+    const s = context.scopes[i];
+
+    // 发现非数学环境，直接返回 false
+    if (NON_MATH_ENV_REGEX.test(s)) {
+      result = false;
+      break;
+    }
+    // 检测文本或注释前缀
+    if (TEXT_PREFIXES.some(prefix => s.startsWith(prefix))) {
+      result = false;
+      break;
+    }
+    // 匹配数学环境
+    if (MATH_SCOPES_REGEX.test(s)) {
+      result = true;
+      break;
+    }
+  }
+
+  // 保存计算结果，并控制缓存大小
+  scopeCache.set(key, result);
+  if (scopeCache.size > MAX_CACHE_SIZE) {
+    const firstKey = scopeCache.keys().next().value;
+    scopeCache.delete(firstKey);
+  }
+
+  return result;
 }
 endglobal
+
+
 
 global
 // Dic
@@ -297,15 +357,15 @@ endsnippet
 # ptl ⇨ \partiAl                          ║  ∂
 
 
-context math(context)
-snippet `DD` "diffraction" iA
-\\frac{\\mathrm{d}$1}{\\mathrm{d}$2}
-endsnippet
+# context math(context)
+# snippet `DD` "diffraction" iA
+# \\frac{\\mathrm{d}$1}{\\mathrm{d}$2}
+# endsnippet
 
-context math(context)
-snippet `PP` "partiAl diffraction" iA
-\\frac{\\partiAl $1}{\\partiAl $2}
-endsnippet
+# context math(context)
+# snippet `PP` "partiAl diffraction" iA
+# \\frac{\\partiAl $1}{\\partiAl $2}
+# endsnippet
 
 
 context math(context)
@@ -554,8 +614,8 @@ endsnippet
 # EE  ⇨ \exist          ║   ∃
 # abs ⇨ \left|▮\right|
 # ||  ⇨ \left|▮\right|
-# VV  ⇨ \times 10^{▮}  ║   ×10▘
 # !=  ⇨ \not =          ║   ≠
+# <> ⇨ \langle▮\rangle  ║   ≠
 
 context math(context)
 snippet `(\\?)(nbl)` "nabla" iA
@@ -578,11 +638,6 @@ snippet `(\|\||abs)` "abs" iA
 endsnippet
 
 context math(context)
-snippet `(?<=(\$)?)VV` "*10^{}" iA
-``rv=m[1]?"":"\\\\times "``10^{$1}$0
-endsnippet
-
-context math(context)
 snippet `\!=` "not =" iA
 \\not =
 endsnippet
@@ -592,6 +647,10 @@ snippet `tt` "text" iA
 \\text{$1}$0
 endsnippet
 
+context math(context)
+snippet `<>` "langle" iA
+\langle $1 \rangle$0
+endsnippet
 
 
 
@@ -606,7 +665,7 @@ endsnippet
 # a;    ⇨ \alpha ║ α
 
 context math(context)
-snippet `[\\]?(alpha|beta|chi|delta|epsilon|varepsilon|phi|varphi|gamma|eta|iota|kappa|varkappa|lambda|mu|nu|omicron|pi|varpi|theta|vartheta|rho|sigma|varsigma|tau|upsilon|omega|xi|psi|zeta|Alpha|Beta|Chi|Delta|Epsilon|Phi|Gamma|Eta|Iota|Kappa|Lambda|Mu|Nu|Omicron|Pi|Theta|Rho|Sigma|Tau|Upsilon|Omega|Xi|Psi|Zeta)` "greek" iA
+snippet `[\\]?(alpha|beta|chi|delta|epsilon|varepsilon|phi|varphi|gamma|eta|iota|kappa|varkappa|lambda|mu|nu|omicron|pi|varpi|theta|vartheta|rho|sigma|varsigma|tau|upsilon|omega|xi|psi|zeta|Alpha|Beta|Chi|Delta|Epsilon|Phi|Gamma|Eta|Iota|Kappa|Lambda|Mu|Nu|Omicron|Pi|Theta|Rho|Sigma|Tau|Upsilon|Omega|Xi|Psi|Zeta|ket|bra)` "greek" iA
 \\``rv=m[1]``
 endsnippet
 
@@ -1042,10 +1101,10 @@ endsnippet
 # Zp ⇨ \mathbb{Z}_p
 #
 
-context math(context)
-snippet `Zp` "Z_p" iA
-\\mathbb{Z}_p
-endsnippet
+# context math(context)
+# snippet `Zp` "Z_p" iA
+# \\mathbb{Z}_p
+# endsnippet
 
 ### Q_p
 #
@@ -1273,6 +1332,24 @@ endsnippet
 context math(context)
 snippet `ina;` "injective arrow" iA
 \\hookrightarrow
+endsnippet
+
+### arrow 
+#
+# -> ⇨ \longrightarrow
+#
+context math(context)
+snippet `->` "longrightarrow" iA
+\\longrightarrow
+endsnippet
+
+### map to 
+#
+# |-> ⇨ \mapsto
+#
+context math(context)
+snippet `\|->` "mapsto" iA
+\\mapsto
 endsnippet
 
 
