@@ -2,7 +2,7 @@
 #                                        #
 #    HyperSnips MAth for LaTeX           #
 #                                        #
-#            2025/8/8                    #
+#            2023/11/14                  #
 #                                        #
 #        For Hypersnips math             #
 #                                        #
@@ -27,367 +27,44 @@
 
 #### Global JavaScript Function ####
 global
-/**
- * ScopeStack Analyzer (SSA) v1.3
- * - Unified cache with compound keys for all operations
- * - Bit flags for ultra-fast math type detection
- * - Optimized string operations with early string length checks
- * - Smarter cache eviction (preserves frequently used entries)
- * - Enhanced environment sets with common packages
- */
-
-// ---------- Constants ----------
-const MATH_ENV_SET = new Set([
-  // Standard LaTeX
-  'align', 'align*', 'alignat', 'alignat*', 'equation', 'equation*',
-  'eqnarray', 'eqnarray*', 'gather', 'gather*', 'multline', 'multline*',
-  'array', 'matrix', 'pmatrix', 'bmatrix', 'vmatrix', 'Vmatrix',
-  'smallmatrix', 'cases', 'split', 'subequations', 'flalign', 'flalign*',
-  'math', 'displaymath', 'CD',
-  // Inner structures
-  'aligned', 'gathered', 'alignedat', 'cases*', 'dcases', 'rcases',
-  // AMSmath additions
-  'xalignat', 'xalignat*', 'xxalignat', 'xxalignat*',
-  // Physics package
-  'dmath', 'dmath*', 'dseries', 'dseries*'
-]);
-
-const NON_MATH_ENV_SET = new Set([
-  'itemize', 'enumerate', 'description', 'list', 'theorem', 'lemma',
-  'proposition', 'corollary', 'proof', 'definition', 'example', 'remark',
-  'note', 'figure', 'table', 'abstract', 'titlepage', 'verbatim',
-  'lstlisting', 'minted', 'comment', 'quotation', 'quote', 'verse',
-  'center', 'flushleft', 'flushright', 'minipage', 'frame'
-]);
-
-// Regex with caching for better performance
-const ENV_EXTRACTOR = /meta\.environment\.([^.]+(?:\.[^.]+)*)\.latex\b/;
-
-// Bit flags for math type detection (faster than string comparison)
-const MATH_TYPE = {
-  NONE: 0,
-  INLINE: 1,
-  DISPLAY: 2,
-  ENVIRONMENT: 4,
-  TEXT_OVERRIDE: 8
-};
-
-// ---------- Enhanced Cache System ----------
-class SmartCache {
-  constructor(maxSize = 200) {
-    this.cache = new Map();
-    this.hits = new Map();  // Track hit counts for smart eviction
-    this.maxSize = maxSize;
-  }
-
-  get(key) {
-    if (!this.cache.has(key)) return undefined;
-    
-    const val = this.cache.get(key);
-    // Track hits for smart eviction
-    this.hits.set(key, (this.hits.get(key) || 0) + 1);
-    
-    // LRU promotion (only for frequently accessed items)
-    if (this.hits.get(key) > 2) {
-      this.cache.delete(key);
-      this.cache.set(key, val);
-    }
-    
-    return val;
-  }
-
-  set(key, val) {
-    this.cache.set(key, val);
-    this.hits.set(key, 0);
-    
-    if (this.cache.size > this.maxSize) {
-      this.evict();
-    }
-  }
-
-  evict() {
-    // Smart eviction: remove least frequently used items first
-    const entries = Array.from(this.cache.keys())
-      .map(k => ({ key: k, hits: this.hits.get(k) || 0 }))
-      .sort((a, b) => a.hits - b.hits);
-    
-    const toRemove = Math.floor(this.maxSize / 3);
-    for (let i = 0; i < toRemove; i++) {
-      const key = entries[i].key;
-      this.cache.delete(key);
-      this.hits.delete(key);
-    }
-  }
-
-  clear() {
-    this.cache.clear();
-    this.hits.clear();
-  }
-}
-
-// Unified cache for all operations
-const cache = new SmartCache(250);
-
-// ---------- Optimized Scope Classifiers ----------
-
-// Pre-compiled scope prefixes for faster checking
-const MATH_PREFIXES = ['meta.math', 'string.other.math', 'meta.function.math'];
-const TEXT_PREFIXES = ['meta.group.braces.text', 'meta.embedded.text', 'comment', 'string.quoted', 'markup.raw'];
-
-function isMathScope(s) {
-  // Quick length check (most math scopes are longer than 9 chars)
-  if (s.length < 9) return false;
-  
-  // Check prefixes first (most common)
-  for (const prefix of MATH_PREFIXES) {
-    if (s.startsWith(prefix)) return true;
-  }
-  
-  // Then check includes (less common)
-  return s.includes('.math.inline') ||
-         s.includes('.math.display') ||
-         s.includes('.math.parenthesis') ||
-         s.includes('.math.bracket');
-}
-
-function isTextOverride(s) {
-  // Quick reject for file scope
-  if (s.length < 5 || s[0] === 't' && s.startsWith('text.tex.')) return false;
-  
-  // Check common prefixes
-  for (const prefix of TEXT_PREFIXES) {
-    if (s.startsWith(prefix)) return true;
-  }
-  
-  // Check for .text patterns (but not text.tex)
-  if (s.includes('.text')) {
-    return !s.startsWith('text.tex.');
-  }
-  
-  return false;
-}
-
-function isEnvironment(s) {
-  // Most env scopes are at least 20 chars
-  return s.length >= 20 && s.includes('meta.environment.');
-}
-
-// Cached environment name extraction
-const envNameCache = new Map();
-function extractEnvName(s) {
-  if (envNameCache.has(s)) return envNameCache.get(s);
-  
-  const m = ENV_EXTRACTOR.exec(s);
-  if (!m) {
-    envNameCache.set(s, null);
-    return null;
-  }
-  
-  const parts = m[1].split('.');
-  const name = parts[parts.length - 1] || null;
-  
-  envNameCache.set(s, name);
-  if (envNameCache.size > 100) {
-    // Simple FIFO eviction for env names
-    const firstKey = envNameCache.keys().next().value;
-    envNameCache.delete(firstKey);
-  }
-  
-  return name;
-}
-
-// ---------- Core Resolver with Type Detection ----------
-
-function resolveModeWithType(context) {
-  const scopes = context?.scopes || [];
-  if (scopes.length === 0) return MATH_TYPE.NONE;
-  
-  let mathType = MATH_TYPE.NONE;
-  let hasTextOverride = false;
-  
-  for (let i = scopes.length - 1; i >= 0; i--) {
-    const s = scopes[i];
-    
-    // Text override wins immediately
-    if (isTextOverride(s)) {
-      hasTextOverride = true;
-      mathType = MATH_TYPE.TEXT_OVERRIDE;
-      break;
-    }
-    
-    // Check for inline/display markers first (most specific)
-    if (s.includes('.math.inline') || s.includes('.math.parenthesis')) {
-      mathType |= MATH_TYPE.INLINE;
-      break;  // Found specific type, exit
-    }
-    if (s.includes('.math.display') || s.includes('.math.bracket')) {
-      mathType |= MATH_TYPE.DISPLAY;
-      break;  // Found specific type, exit
-    }
-    
-    // General math scope
-    if (isMathScope(s)) {
-      mathType |= MATH_TYPE.INLINE;  // Default to inline if not specified
-      continue;  // Keep looking for more specific info
-    }
-    
-    // Environment check
-    if (isEnvironment(s)) {
-      const env = extractEnvName(s);
-      if (!env) continue;
-      
-      if (MATH_ENV_SET.has(env)) {
-        mathType |= MATH_TYPE.ENVIRONMENT;
-        // Most math environments are display-style
-        if (!env.includes('inline') && !env.includes('small')) {
-          mathType |= MATH_TYPE.DISPLAY;
-        }
-        break;
-      }
-      if (NON_MATH_ENV_SET.has(env)) {
-        mathType = MATH_TYPE.NONE;
-        break;
-      }
-    }
-  }
-  
-  return hasTextOverride ? MATH_TYPE.TEXT_OVERRIDE : mathType;
-}
-
-// ---------- Public API with Unified Caching ----------
-
 function math(context) {
-  const scopes = context?.scopes || [];
-  const key = 'm:' + scopes.join('\x1f');
+  // Add defensive checks to prevent errors during parsing
+  if (!context || !context.scopes || !Array.isArray(context.scopes)) {
+    return false;
+  }
   
-  const cached = cache.get(key);
-  if (cached !== undefined) return cached;
+  const scopes = context.scopes;
+  let lastMath = -1;
+  let lastNonMath = -1;
   
-  const type = resolveModeWithType(context);
-  const result = type !== MATH_TYPE.NONE && type !== MATH_TYPE.TEXT_OVERRIDE;
-  
-  cache.set(key, result);
-  return result;
+  for (let i = 0; i < scopes.length; i++) {
+    const s = scopes[i];
+    if (typeof s === 'string' && s.includes('.math')) {
+      // Any scope containing ".math" counts as math (inline, display, or AMS)
+      lastMath = i;
+    } else if (
+      typeof s === 'string' && (
+        // Non‑math environment (lemma, theorem, definition, proof, remark, etc.)
+        (s.includes('meta.environment') && !s.includes('.math')) ||
+        // Plain text or comments
+        s.startsWith('comment') ||
+        s.startsWith('meta.text.normal.tex')
+      )
+    ) {
+      lastNonMath = i;
+    }
+  }
+  return lastMath > lastNonMath;
 }
 
 function text(context) {
+  // Add defensive check here as well
+  if (!context) {
+    return true; // Default to text mode if no context
+  }
   return !math(context);
 }
-
-function inlineMath(context) {
-  const scopes = context?.scopes || [];
-  const key = 'i:' + scopes.join('\x1f');
-  
-  const cached = cache.get(key);
-  if (cached !== undefined) return cached;
-  
-  const type = resolveModeWithType(context);
-  const result = (type & MATH_TYPE.INLINE) !== 0 && (type & MATH_TYPE.TEXT_OVERRIDE) === 0;
-  
-  cache.set(key, result);
-  return result;
-}
-
-function displayMath(context) {
-  const scopes = context?.scopes || [];
-  const key = 'd:' + scopes.join('\x1f');
-  
-  const cached = cache.get(key);
-  if (cached !== undefined) return cached;
-  
-  const type = resolveModeWithType(context);
-  const result = (type & MATH_TYPE.DISPLAY) !== 0 && (type & MATH_TYPE.TEXT_OVERRIDE) === 0;
-  
-  cache.set(key, result);
-  return result;
-}
-
-function currentEnvironment(context) {
-  const scopes = context?.scopes || [];
-  const key = 'e:' + scopes.join('\x1f');
-  
-  const cached = cache.get(key);
-  if (cached !== undefined) return cached;
-  
-  for (let i = scopes.length - 1; i >= 0; i--) {
-    const s = scopes[i];
-    if (isEnvironment(s)) {
-      const env = extractEnvName(s) || null;
-      cache.set(key, env);
-      return env;
-    }
-  }
-  
-  cache.set(key, null);
-  return null;
-}
-
-// ---------- Helper Functions ----------
-
-/**
- * Check if in any math environment (not just math mode)
- */
-function inMathEnvironment(context) {
-  const env = currentEnvironment(context);
-  return env && MATH_ENV_SET.has(env);
-}
-
-/**
- * Check if in text-like environment
- */
-function inTextEnvironment(context) {
-  const env = currentEnvironment(context);
-  return env && NON_MATH_ENV_SET.has(env);
-}
-
-/**
- * Get the math context type as a string
- */
-function mathContextType(context) {
-  const type = resolveModeWithType(context);
-  if (type & MATH_TYPE.TEXT_OVERRIDE) return 'text';
-  if (type & MATH_TYPE.DISPLAY) return 'display';
-  if (type & MATH_TYPE.INLINE) return 'inline';
-  if (type & MATH_TYPE.ENVIRONMENT) return 'environment';
-  return 'text';
-}
-
-// ---------- Warmup with Extended Patterns ----------
-const warmupPatterns = [
-  // Basic patterns
-  ['text.tex.latex'],
-  ['text.tex.latex', 'meta.math.inline.latex'],
-  ['text.tex.latex', 'meta.math.display.latex'],
-  ['text.tex.latex', 'meta.environment.align.latex', 'meta.math'],
-  ['text.tex.latex', 'meta.environment.equation.latex', 'meta.math'],
-  ['text.tex.latex', 'meta.environment.theorem.latex'],
-  ['text.tex.latex', 'meta.math', 'meta.group.braces.text'],
-  // Common inline patterns
-  ['text.tex.latex', 'meta.math.inline.latex', 'meta.function.latex'],
-  ['text.tex.latex', 'string.other.math.inline.latex'],
-  // Display patterns
-  ['text.tex.latex', 'meta.math.display.latex', 'meta.function.latex'],
-  ['text.tex.latex', 'string.other.math.display.latex'],
-  // Nested environments
-  ['text.tex.latex', 'meta.environment.align.latex', 'meta.math', 'meta.group.braces.text'],
-  ['text.tex.latex', 'meta.environment.proof.latex', 'meta.math.inline.latex']
-];
-
-// Warmup all functions
-warmupPatterns.forEach(scopes => {
-  const ctx = { scopes };
-  math(ctx);
-  inlineMath(ctx);
-  displayMath(ctx);
-  currentEnvironment(ctx);
-});
-
-// ---------- Export for testing (if needed) ----------
-// Uncomment if you need to test individual functions
-// module.exports = { math, text, inlineMath, displayMath, currentEnvironment, mathContextType };
-
 endglobal
-
 
 global
 // Dic
@@ -1098,24 +775,15 @@ endsnippet
 # {  ⇨ {}
 # \{ ⇨ \{\}
 
-context math(context)
-snippet `(?<!\\left)\(` "bracket" iA
-($1)$0
-endsnippet
+# context math(context)
+# snippet `(?<!\\left)\(` "bracket" iA
+# ($1)$0
+# endsnippet
 
 context math(context)
 snippet `(?<!\\left)\[` "bracket" iA
 [$1]$0
 endsnippet
-
-
-context math(context)
-priority 100
-
-snippet `\{` "bracket" iA
-{$1}$0
-endsnippet
-
 
 context math(context)
 priority 100
@@ -1135,7 +803,6 @@ endsnippet
 
 context math(context)
 priority 10000
-
 snippet `(?<!\\left)\\\{` "bracket" iA
 \\{$1\\}$0
 endsnippet
@@ -1673,7 +1340,6 @@ endsnippet
 
 ### Auto take alone character as math
 
-
 context text(context)
 snippet `([^'])\b((?![aAI])[a-zA-Z])\b([\n\s\.,])` "Treat lone characters as math (except a, A, I)" wA
 ``rv =m[1]``\\(``rv=m[2]``\\)``rv=m[3]``
@@ -1690,10 +1356,10 @@ endsnippet
 
 ###-------------------------------------------------------------------------------------------------------------------------------------------------------- The snippets of coding theory ------------------------------------------------------------------------------------------------------------------------------------------
 
-context math(context)
-snippet `wt` "weight" iA
-\\operatorname{wt}
-endsnippet
+# context math(context)
+# snippet `wt` "weight" iA
+# \\operatorname{wt}
+# endsnippet
 
 # Mathematical operators and text snippets
 # Convert mathematical operators to \operatorname{} and text terms to \text{} automatically
