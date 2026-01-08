@@ -523,7 +523,7 @@ endsnippet
 
 ### 3.1 Full names (alpha → \\alpha)
 context math(context)
-snippet `[\\]?(alpha|beta|chi|delta|epsilon|varepsilon|phi|varphi|gamma|eta|iota|kappa|varkappa|lambda|mu|nu|omicron|pi|varpi|theta|vartheta|rho|sigma|varsigma|tau|upsilon|omega|xi|psi|zeta|Alpha|Beta|Chi|Delta|Epsilon|Phi|Gamma|Eta|Iota|Kappa|Lambda|Mu|Nu|Omicron|Pi|Theta|Rho|Sigma|Tau|Upsilon|Omega|Xi|Psi|Zeta|ket|bra)` "greek names" iA
+snippet `[\\]?(alpha|beta|chi|delta|epsilon|varepsilon|phi|varphi|gamma|eta|iota|kappa|varkappa|lambda|mu|nu|omicron|pi|varpi|theta|vartheta|rho|sigma|varsigma|tau|upsilon|omega|xi|psi|zeta|Alpha|Beta|Chi|Delta|Epsilon|Phi|Gamma|Eta|Iota|Kappa|Lambda|Mu|Nu|Omicron|Pi|Theta|Rho|Sigma|Tau|Upsilon|Omega|Xi|Psi|Zeta|ket|bra|perp)` "greek names" iA
 \\``rv=m[1]``
 endsnippet
 
